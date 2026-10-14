@@ -21,6 +21,7 @@ contract WMTFactoryHarness {
     }
 }
 
+/// forge-config: default.fuzz.runs = 1000
 contract WMTTest is Test {
     uint256 internal constant SUPPLY = 1_000_000_000_000_000_000_000_000_000;
 
@@ -364,7 +365,8 @@ contract WMTTest is Test {
     }
 
     function testFuzz_transferConservesSupply(address recipient, uint256 rawAmount) public {
-        vm.assume(recipient != address(0) && recipient != address(this));
+        // Construct a valid destination without discarding generated inputs.
+        if (recipient == address(0) || recipient == address(this)) recipient = alice;
         uint256 amount = bound(rawAmount, 0, SUPPLY);
         assertTrue(token.transfer(recipient, amount));
         assertEq(token.balanceOf(recipient), amount);
